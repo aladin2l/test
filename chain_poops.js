@@ -2462,23 +2462,28 @@ let allDone = false;
                 + " reached=" + (triplets ? "triplets" : committed ? "commit" : "none"));
         }
 
-        state(allDone ? "ALL DONE GoldHEN Loaded Press (PS) to EXIT"
-              : kv ? "KERNEL R/W -- REBOOT NEEDED"
-              : kernelBase ? "FAILED IN make_karw -- REBOOT"
-              : triplets ? "FAILED IN leak_kqueue (triple free was OK) -- REBOOT"
-              : committed ? "FAILED IN triple free -- REBOOT"
-              : "no commit", allDone ? "ok" : kv ? "warn" : "bad");
-	//  FIX: Freeze the circles directly on the elements so NOTHING blanks out!
+            state(allDone ? "ALL DONE GoldHEN Loaded Press (PS) to EXIT"
+                  : kv ? "FAILED : RESTART PS4 EVEN GOLDHEN LOADED TO PREVENT SUDDEN SHUTDOWN`"
+                  : kernelBase ? "FAILED IN make_karw -- REBOOT"
+                  : triplets ? "FAILED IN leak_kqueue (triple free was OK) -- REBOOT"
+                  : committed ? "FAILED IN triple free -- REBOOT"
+                  : "no commit", allDone ? "ok" : kv ? "warn" : "bad");	
+        
+			  // FIXED: Only stop the inner spin element (Outer running-circle is removed)
     var sEl = document.getElementById("spin");
+
     if (sEl) {
-        sEl.style.animation = "none";
-        sEl.style.borderTopColor = "#00d8ff"; // Retains original blue
+        sEl.classList.remove("spinning-active"); 
+        sEl.style.display = "block";           // Force keep it visible
+        sEl.style.borderTopColor = "#00d8ff";   // Lock its color to original blue
     }
-			  
+	
     } catch (e) {
         mark("STEP10-FAILED", (e && e.message) ? e.message : String(e));
-        state("FAILED -- see log", "bad");
+        state("FAILED -- se use thise log", "bad");
+ 
     } finally {
+
 
         if (uafSock) mark("UAF-SOCK-LEFT-OPEN", "fd=" + uafSock);
 

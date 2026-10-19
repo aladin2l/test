@@ -4,30 +4,50 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PS4 Ormoc Jailbreaker</title>
-  <style>
+ <style>
     html, body { margin: 0; padding: 0; min-height: 100%; background: #0b0d10; color: #c8ced8; font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
     #brand { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 20px 15px; background: linear-gradient(180deg, #10141d 0%, #0b0d10 100%); border-bottom: 1px solid #1e2732; }
     #brand img { width: 160px; height: 48px; object-fit: contain; }
     #brand b { font-size: 40px; font-weight: 800; letter-spacing: .08em; color: var(--text-primary, #ffffff); text-transform: uppercase; background: linear-gradient(90deg, #ffffff 0%, #a3b3cc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #spin { position: fixed; top: 50%; left: 50%; width: 140px; height: 140px; margin: -74px 0 0 -74px; border: 4px solid #1e2732; border-top-color: #7fd0a0; border-radius: 50%; animation: spin 0.9s linear infinite; display: block; z-index: 1; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Inner spin container */
+    #spin { 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      width: 140px; 
+      height: 140px; 
+      border: 4px solid #1e2732; 
+      border-top-color: #7fd0a0; 
+      border-radius: 50%; 
+      display: none; 
+      z-index: 1; 
+    }
+    
+    /* Strict multi-state transition keeps coordinates completely centered during movement */
+    @keyframes spin { 
+      0% { transform: translate(-50%, -50%) rotate(0deg); } 
+      100% { transform: translate(-50%, -50%) rotate(360deg); } 
+    }
+    
     #running-circle { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; border-radius: 50%; border: 3px dashed #00d8ff; background: transparent; box-shadow: inset 0 0 15px rgba(0, 191, 255, 0.1), 0 0 10px #00bfff; display: block; z-index: 1; }
     #wrap { padding: 0; }
     #state, #out { display: none; }
     
-      /* CACHE READY VISUAL OVERRIDES: COMPLETELY WIPES OFF THE LOADING SPIN WHEEL SEAMLESSLY */
+    /* CACHE READY VISUAL OVERRIDES: COMPLETELY WIPES OFF THE LOADING SPIN WHEEL SEAMLESSLY */
     body.succes-ready #spin,
     body.jb-ready #spin { 
-        display: none !important; /* Hides the spin wheel completely when successful */
+        display: none !important; 
     }
    
     /* Keeps the outer dashed decorative ring in its ORIGINAL BLUE COLOR and frozen on success */
     body.succes-ready #running-circle,
     body.jb-ready #running-circle {
         display: block !important;
-        animation: none !important; /* Stops any rotating motion dead in its tracks */
-        border-color: #00d8ff !important; /* RETAINED: Keeps the original cyber blue color */
-        box-shadow: inset 0 0 15px rgba(0, 191, 255, 0.1), 0 0 10px #00bfff !important; /* RETAINED: Original glow */
+        animation: none !important; 
+        border-color: #00d8ff !important; 
+        box-shadow: inset 0 0 15px rgba(0, 191, 255, 0.1), 0 0 10px #00bfff !important; 
     }
     
     /* Displays your custom text block centered perfectly inside the frozen original blue ring */
@@ -48,7 +68,18 @@
     #det b { color: #c8ced8; font-weight: 600; }
     #cache { font-size: 20px; color: #5c6672; margin: 0 0 10px; min-height: 14px; }
     #cache.cacheok { color: #7fd0a0; }
-	#txt { font-size: 30px; font-weight: 700; margin: 0 0 8px; display: block; }
+    #txt { font-size: 30px; font-weight: 700; margin: 0 0 8px; display: block; }
+
+    /* This class triggers inner loop rotation on click safely */
+    .spinning-active {
+      display: block !important;
+      animation: spin 0.9s linear infinite !important;
+    }
+
+    /* FIXED: This class keeps your outer cyber ring static/frozen when clicked */
+    .pulse-active {
+      animation: none !important;
+    }
 	
     .ok { color: #7fd0a0; }
     .bad { color: #7fd0a0; }
@@ -66,7 +97,57 @@
     .succes-done { font-size: 50px; font-weight: 800; color: #7fd0a0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 10px rgba(127, 208, 160, 0.4); }
     .succes-action { font-size: 40px; font-weight: 800; color: #3bd8ff; text-transform: uppercase; letter-spacing: 2px; }
 	
+    /* CIRCULAR BUTTON WITH MULTI-TEXT LAYOUT SPECIFICATIONS */
+    .jb-button {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); 
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 3px dashed #3bd8ff; 
+      background: transparent;    
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 15px rgba(0, 191, 255, 0.1), 0 0 10px #00bfff;
+      z-index: 2; 
+      outline: none;
+      text-align: center;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .btn-main-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .btn-sub-text {
+      font-size: 35px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #00d8ff;
+    }
+    .jb-button:hover {
+      box-shadow: inset 0 0 20px rgba(0, 216, 255, 0.2), 0 0 14px #00d8ff;
+      border-color: #00d8ff;
+    }
+    .jb-button:disabled {
+      border-color: rgba(30, 39, 50, 0.5);
+      box-shadow: none;
+      cursor: default;
+    }
 </style>
+
+
+
 </head>
 <body>
 
@@ -76,6 +157,7 @@
   <div id="brand">
     <b>Ormoc Gaming Console Repair</b>
   </div>
+  
 
   <div id="spin"></div>
   <div id="running-circle"></div>
@@ -91,20 +173,53 @@ letter-spacing: 2px; text-shadow: 0 0 12px rgba(163, 230, 53, 0.7), 0 0 25px rgb
 margin: 0; text-align: center; z-index: 5;"></h1>
 
   <div id="wrap">
-    <div id="state">detecting firmware...</div>
+    <div id="state">Awaiting execution...</div>
 	<div id="det"></div>
 	
 	<div id="txt">After Jailbreak Loaded Dont Run WWW Again</div>
     <div id="out"></div>
   </div>
+  
+<!-- THE CORRECTED JAILBREAK TRIGGER BUTTON -->
+<button id="jeilbrek" class="jb-button" type="button" onclick="startJailbreakProcess()">
+  <span class="btn-main-text">Jailbreak</span>
+  <span class="btn-main-text">Now</span>
+  <span class="btn-sub-text">Press</span>
+  <span class="btn-sub-text">OK</span>
+</button>
 
+<div class="contact-box">
+  <div class="contact-number">Contact: Fb : Aladin F. Toel 09066876054</div>
+</div>
 
-  <div class="contact-box">
-    <div class="contact-number">Contact: Fb : Aladin F. Toel 09066876054</div>
-  </div>
+<script>
+  function startJailbreakProcess() {
+    // 1. Hide the button container immediately
+    document.getElementById('jeilbrek').style.display = 'none';
+    
+    // 2. Update the status text
+    document.getElementById('state').innerText = "Launching exploit chain...";
 
-<script type="module"> 
- import "./chain_poops.js"; 
+    // 3. FORCE KICKSTART ANIMATIONS FIRST
+    document.getElementById('spin').classList.add('spinning-active');
+    document.getElementById('running-circle').classList.add('pulse-active');
+
+    // 4. DELAY EXPLOIT LOADING BY 100ms (Gives the PS4 engine time to render the spin)
+    setTimeout(function() {
+      import("./chain_poops.js")
+        .then((module) => {
+          console.log("Jailbreak script running synced with animations.");
+        })
+        .catch((err) => {
+          console.error("Failed to load chain_poops.js:", err);
+          document.getElementById('state').innerText = "Error loading exploit script!";
+          
+          // Stop animations if loading crashes
+          document.getElementById('spin').classList.remove('spinning-active');
+          document.getElementById('running-circle').classList.remove('pulse-active');
+        });
+    }, 100); // 100 milliseconds delay solves the thread freeze
+  }
 </script>
 
 
